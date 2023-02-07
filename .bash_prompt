@@ -1,0 +1,34 @@
+#!/bin/false 
+# shellcheck shell=bash  
+#  /bin/false added to permit sourcing *not direct execution* of ~.bash_prompt 
+#  sourced by ~/.bashrc to set user PS1 prompt
+#
+
+## Initialize PS1 prompt for non starship prompts
+_set_my_PS1() {
+    #PS1='[\u@\h \W]\$ '
+    # Initialize colors and clear character-count tput variables
+    red="$(tput setaf 1)"
+    green="$(tput setaf 2)"
+    orange="$(tput setaf 3)"
+    blue="$(tput setaf 4)"
+    magenta="$(tput setaf 5)"
+    cyan="$(tput setaf 6)"
+    white="$(tput setaf 7)"
+    reset="$(tput sgr0)"    
+    
+    if [[ "$(id -u)" -ge 1000 ]]; then
+	#PS1="\[$cyan\]{\t}\[$blue\][\u@\h]\[$orange\]<\W>\[$green\]\$\[$reset\] "
+        PS1="\[$red\]{\t}\[$cyan\]<\u@\h>\[$white\]\w:\[$green\]\$\[$reset\] "
+    else
+        PS1="\[$cyan\]{\t}\[$blue\][\u@\h]\[$orange\]<\W>\[$green\]\#\[$reset\] "
+    fi	
+}
+_set_my_PS1
+unset -f _set_my_PS1
+
+## use starship prompt with cutsom starship config directory exported as env variable
+export STARSHIP_CONFIG=~/.config/starship/starship.toml
+eval "$(starship init bash)"
+
+

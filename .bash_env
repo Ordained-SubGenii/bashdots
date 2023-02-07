@@ -1,0 +1,62 @@
+#!/bin/false
+# shellcheck shell=bash 
+# #!/bin/false added to permit only sourcing *not direect executing* of ~.bash_env 
+# sourced by ~/.bashrc to set user inherited environments
+
+
+_set_userPath() {
+  # alter PATH only for user-account
+if [[ ! $UID -ge 1000 ]]; then return; fi
+
+ # directories -to ammend to system PATH- stored in array variable..added .nim for nim binaries using choosenim AUR pkg 
+ammend_dirs=( "$HOME/bin" "$HOME/.local/bin" )
+
+for i in "${ammend_dirs[@]}"; do
+          # create each directory if it doesn't exist
+    if [[ ! -d "$i" ]]; then mkdir -p -- "$i"; printf "making dir %s$i \n"; fi
+          # check if dir is already in PATH using regex, if not append to existing PATH value
+    local re
+    re="$i"
+    if [[ ! "$(printenv PATH)" =~ $re ]]; then export PATH="${PATH%/}:$i"; fi
+done
+}
+_set_userPath
+
+
+_set_VISUAL() {
+## if want lvim as default but fall back to nvim or if not nvim vim
+if type -P lvim &>/dev/null; then 
+	export VISUAL="/home/feindsdeluna/.local/bin/lvim"
+elif
+   type -P nvim &>/dev/null; then
+	export VISUAL="/usr/bin/nvim"
+elif
+   type -P vim &>/dev/null; then
+   	export VISUAL="/usr/bin/vim"
+else
+   { printf "neither nvim nor vim detected. not exporting VISUAL env"; return 1; }
+fi
+## if want nvim as default but fallback to vim
+#if type -P nvim &>/dev/null; then
+#        export VISUAL="/usr/bin/nvim" 
+#elif 
+#    type -P vim &>/dev/null; then
+#        export VISUAL="/usr/bin/vim" 
+#else
+#	{ printf "neither nvim nor vim detected. not exporting VISUAL env"; return 1; }
+#fi
+
+## vim as default visual and nvim as fallback
+#if type -P vim &>/dev/null; then
+#	export VISUAL="/usr/bin/vim"
+#elif
+#   type -P nvim &>/dev/null; then
+#       export VISUAL="/usr/bin/nvim" 
+#else
+# { printf "neither vim nor nvim detected. not exporting VISUAL env"; return 1; }
+#fi
+}
+_set_VISUAL 
+
+## using dbus command, load all user environment variables for systemd user and dbus session (executes systemctl --user import-environment as part of dbus command
+dbus-update-activation-environment --systemd --all
